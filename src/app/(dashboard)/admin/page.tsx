@@ -45,6 +45,7 @@ import {
   Filter,
   MoreVertical
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Admin {
   id: string;
@@ -77,6 +78,7 @@ interface ActivityLog {
 }
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const [admin, setAdmin] = useState<Admin | null>(null);
   const [stats, setStats] = useState<SystemStats>({
     totalUsers: 1250,
@@ -129,14 +131,30 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     // Simulate fetching admin data
-    setAdmin({
-      id: "ADM001",
-      name: "Super Admin",
-      email: "admin@edusmart.com",
-      role: "System Administrator",
-      permissions: ["all"],
-      lastLogin: new Date().toISOString(),
-    });
+    const fetchdashboard = async()=>{
+      try{
+        const res = await fetch("/api/dashboard/admin/stats",{
+          credentials: "include",
+          headers:{
+            'Accept':'application/json',
+          }
+        })
+        if (!res.ok) {
+          if (res.status === 401) {
+           console.log("problem occurs");
+          }
+          return;
+        }
+
+        const data = await res.json();
+        setAdmin(data);
+      }
+      catch(error){
+        console.error("admin fetch ",error);
+      }
+    }
+    
+    fetchdashboard();
   }, []);
 
   // Close dropdowns when clicking outside
@@ -177,6 +195,21 @@ export default function AdminDashboard() {
       default: return 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-900/30';
     }
   };
+
+  const logout = async()=>{
+     try{
+      await fetch("api/auth/logout",{
+        method: "POST",
+      });
+    }
+    catch(error){
+      console.log(error);
+    }
+    finally{
+      localStorage.clear();
+      router.push("/login");
+    }
+  }
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -407,7 +440,9 @@ export default function AdminDashboard() {
                     </a>
                     
                     <div className="border-t border-gray-100 px-4 py-2 dark:border-gray-700">
-                      <button className="flex w-full items-center gap-3 text-sm text-red-600 hover:text-red-800 dark:text-red-400">
+                      <button
+                      onClick={logout}
+                      className="flex w-full items-center gap-3 text-sm text-red-600 hover:text-red-800 dark:text-red-400">
                         <LogOut className="h-4 w-4" />
                         Logout Admin
                       </button>
@@ -976,7 +1011,9 @@ export default function AdminDashboard() {
               <DatabaseBackup className="h-4 w-4" />
               Backup & Restore
             </a>
-            <button className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20">
+            <button
+            onClick={logout}
+            className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20">
               <LogOut className="h-4 w-4" />
               Logout Admin
             </button>
