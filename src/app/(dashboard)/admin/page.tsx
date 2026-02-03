@@ -80,16 +80,7 @@ interface ActivityLog {
 export default function AdminDashboard() {
   const router = useRouter();
   const [admin, setAdmin] = useState<Admin | null>(null);
-  const [stats, setStats] = useState<SystemStats>({
-    totalUsers: 1250,
-    activeExams: 12,
-    pendingResults: 45,
-    systemHealth: 98.5,
-    storageUsed: 76.3,
-    activeSessions: 342,
-    apiRequests: 12456,
-    errorRate: 0.2
-  });
+  const [stats, setStats] = useState<SystemStats|null>(null);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -147,7 +138,8 @@ export default function AdminDashboard() {
         }
 
         const data = await res.json();
-        setAdmin(data);
+        setAdmin(data.admin);
+        setStats(data.stats)
       }
       catch(error){
         console.error("admin fetch ",error);
@@ -198,7 +190,7 @@ export default function AdminDashboard() {
 
   const logout = async()=>{
      try{
-      await fetch("api/auth/logout",{
+      await fetch("/api/auth/logout",{
         method: "POST",
       });
     }
@@ -303,7 +295,7 @@ export default function AdminDashboard() {
               <div className="hidden items-center gap-2 rounded-lg bg-gray-100 px-3 py-1.5 dark:bg-gray-800 sm:flex">
                 <div className="h-2 w-2 rounded-full bg-green-500"></div>
                 <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                  System {stats.systemHealth}%
+                  System {stats?.systemHealth ??0}%
                 </span>
               </div>
 
@@ -614,7 +606,7 @@ export default function AdminDashboard() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Active Sessions</p>
                   <p className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
-                    {stats.activeSessions}
+                    {stats?.activeSessions??0}
                   </p>
                 </div>
                 <div className="rounded-lg bg-purple-100 p-3 dark:bg-purple-900/30">
@@ -631,7 +623,7 @@ export default function AdminDashboard() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Storage Used</p>
                   <p className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
-                    {stats.storageUsed}%
+                    {stats?.storageUsed??0}%
                   </p>
                 </div>
                 <div className="rounded-lg bg-orange-100 p-3 dark:bg-orange-900/30">
@@ -648,7 +640,7 @@ export default function AdminDashboard() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Error Rate</p>
                   <p className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
-                    {stats.errorRate}%
+                    {stats?.errorRate??0}%
                   </p>
                 </div>
                 <div className="rounded-lg bg-green-100 p-3 dark:bg-green-900/30">
@@ -668,7 +660,7 @@ export default function AdminDashboard() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Total Users</p>
                   <p className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
-                    {stats.totalUsers.toLocaleString()}
+                    {stats?.totalUsers.toLocaleString()??0}
                   </p>
                 </div>
                 <div className="rounded-lg bg-blue-100 p-3 dark:bg-blue-900/30">
@@ -686,7 +678,7 @@ export default function AdminDashboard() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Active Exams</p>
                   <p className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
-                    {stats.activeExams}
+                    {stats?.activeExams??0}
                   </p>
                 </div>
                 <div className="rounded-lg bg-purple-100 p-3 dark:bg-purple-900/30">
@@ -703,7 +695,7 @@ export default function AdminDashboard() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Pending Results</p>
                   <p className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
-                    {stats.pendingResults}
+                    {stats?.pendingResults??0}
                   </p>
                 </div>
                 <div className="rounded-lg bg-orange-100 p-3 dark:bg-orange-900/30">
@@ -720,7 +712,7 @@ export default function AdminDashboard() {
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">System Health</p>
                   <p className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
-                    {stats.systemHealth}%
+                    {stats?.systemHealth??0}%
                   </p>
                 </div>
                 <div className="rounded-lg bg-green-100 p-3 dark:bg-green-900/30">
@@ -852,7 +844,7 @@ export default function AdminDashboard() {
                 <div>
                   <div className="mb-2 flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">API Requests (24h)</span>
-                    <span className="font-medium">{stats.apiRequests.toLocaleString()}</span>
+                    <span className="font-medium">{stats?.apiRequests.toLocaleString()??0}</span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                     <div className="h-full w-4/5 rounded-full bg-blue-500"></div>
@@ -940,7 +932,7 @@ export default function AdminDashboard() {
               </div>
               <div className="rounded bg-gray-100 p-2 text-center dark:bg-gray-800">
                 <p className="text-xs text-gray-600 dark:text-gray-400">System</p>
-                <p className="text-sm font-medium">{stats.systemHealth}%</p>
+                <p className="text-sm font-medium">{stats?.systemHealth??0}%</p>
               </div>
             </div>
           </div>
@@ -952,11 +944,11 @@ export default function AdminDashboard() {
                 <p className="text-sm font-medium text-gray-900 dark:text-white">System Status</p>
                 <div className="mt-1 flex items-center gap-2">
                   <div className={`h-2 w-2 rounded-full ${
-                    stats.systemHealth >= 90 ? 'bg-green-500' :
-                    stats.systemHealth >= 70 ? 'bg-yellow-500' :
+                    // stats?.systemHealth>= 90 ? 'bg-green-500' :
+                    // stats.systemHealth >= 70 ? 'bg-yellow-500' :
                     'bg-red-500'
                   }`}></div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{stats.systemHealth}% Healthy</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{stats?.systemHealth??0}% Healthy</p>
                 </div>
               </div>
               <Activity className="h-5 w-5 text-gray-400" />

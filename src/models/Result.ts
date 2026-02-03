@@ -23,7 +23,7 @@ const ResultSchema: Schema = new Schema({
   grade: { type: String, required: true },
   status: { type: String, enum: ['pass', 'fail'], required: true },
   teacherRemarks: { type: String },
-  publishedAt: { type: Date, default: Date.now },
+  publishedAt: { type: Date, default: null },
 });
 
 export default mongoose.models.Result || mongoose.model<IResult>('Result', ResultSchema);
