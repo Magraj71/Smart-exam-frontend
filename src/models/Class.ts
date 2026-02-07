@@ -1,58 +1,53 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IClass extends Document {
   name: string;
-  code: string;
-  grade: string;
   section?: string;
+  grade: string;
   academicYear: string;
-  classTeacher: mongoose.Types.ObjectId;
+  classTeacher?: mongoose.Types.ObjectId;
   students: mongoose.Types.ObjectId[];
-  maxStrength: number;
-  currentStrength: number;
   subjects: mongoose.Types.ObjectId[];
-  timetable?: Array<{
-    day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
-    periods: Array<{
-      period: number;
-      subjectId: mongoose.Types.ObjectId;
-      teacherId: mongoose.Types.ObjectId;
-      room?: string;
-    }>;
+  capacity: number;
+  roomNumber?: string;
+  schedule?: Array<{
+    day: string;
+    period: number;
+    subject: mongoose.Types.ObjectId;
+    teacher: mongoose.Types.ObjectId;
   }>;
-  status: 'active' | 'graduated' | 'discontinued';
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const ClassSchema: Schema = new Schema({
-  name: { type: String, required: true },
-  code: { type: String, required: true, unique: true },
-  grade: { type: String, required: true },
-  section: { type: String },
-  academicYear: { type: String, required: true },
-  classTeacher: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  students: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  maxStrength: { type: Number, required: true, min: 1 },
-  currentStrength: { type: Number, default: 0 },
-  subjects: [{ type: Schema.Types.ObjectId, ref: 'Subject' }],
-  timetable: [{
-    day: { 
-      type: String, 
-      enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-    },
-    periods: [{
-      period: { type: Number, min: 1 },
-      subjectId: { type: Schema.Types.ObjectId, ref: 'Subject' },
-      teacherId: { type: Schema.Types.ObjectId, ref: 'User' },
-      room: { type: String }
-    }]
-  }],
-  status: { 
-    type: String, 
-    enum: ['active', 'graduated', 'discontinued'],
-    default: 'active'
-  }
-}, { timestamps: true });
+const ClassSchema = new Schema<IClass>(
+  {
+    name: { type: String, required: true, trim: true },
+    section: { type: String },
+    grade: { type: String, required: true },
+    academicYear: { type: String, required: true },
+    classTeacher: { type: Schema.Types.ObjectId, ref: "User" },
+    students: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    subjects: [{ type: Schema.Types.ObjectId, ref: "Subject" }],
+    capacity: { type: Number, default: 40 },
+    roomNumber: { type: String },
+    schedule: [
+      {
+        day: { type: String, enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] },
+        period: { type: Number, min: 1, max: 8 },
+        subject: { type: Schema.Types.ObjectId, ref: "Subject" },
+        teacher: { type: Schema.Types.ObjectId, ref: "User" },
+      },
+    ],
+    isActive: { type: Boolean, default: true },
+  },
+  { timestamps: true }
+);
 
-export default mongoose.models.Class || mongoose.model<IClass>('Class', ClassSchema);
+ClassSchema.index({ name: 1, academicYear: 1 }, { unique: true });
+ClassSchema.index({ grade: 1 });
+ClassSchema.index({ classTeacher: 1 });
+
+export default mongoose.models.Class || 
+  mongoose.model<IClass>("Class", ClassSchema);
